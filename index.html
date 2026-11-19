@@ -318,9 +318,9 @@ function groundHeight(x,z){
  return h+1.65;
 }
 function canMoveTo(x,z){
- const radius=0.35;
+ const radius=0.38;
  const feet=player.y-1.65;
- const head=player.y+0.1;
+ const head=player.y+0.15;
 
  for(const block of blocks.values()){
   const p=block.position;
@@ -328,8 +328,10 @@ function canMoveTo(x,z){
   if(Math.abs(x-p.x)<0.5+radius &&
      Math.abs(z-p.z)<0.5+radius){
 
-   if(head>p.y-0.5 &&
-      feet<p.y+0.5){
+   const bottom=p.y-0.5;
+   const top=p.y+0.5;
+
+   if(head>bottom && feet<top){
     return false;
    }
   }
