@@ -1,0 +1,237 @@
+
+
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<title>VOXEL WORLD 2.0</title>
+
+<style>
+
+*{box-sizing:border-box}
+
+body{
+
+ margin:0;
+
+ overflow:hidden;
+
+ background:#87ceeb;
+
+ font-family:Arial,sans-serif;
+
+ touch-action:none;
+
+}
+
+canvas{display:block}
+
+#title{
+
+ position:absolute;
+
+ top:15px;
+
+ left:0;
+
+ width:100%;
+
+ text-align:center;
+
+ color:white;
+
+ font-size:24px;
+
+ font-weight:bold;
+
+ text-shadow:2px 2px 5px #222;
+
+ pointer-events:none;
+
+}
+
+#crosshair{
+
+ position:absolute;
+
+ top:50%;
+
+ left:50%;
+
+ color:white;
+
+ font-size:25px;
+
+ transform:translate(-50%,-50%);
+
+ pointer-events:none;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="title">VOXEL WORLD 2.0</div>
+
+<div id="crosshair">+</div>
+
+<script type="module">
+
+import * as THREE from
+
+'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+const scene = new THREE.Scene();
+
+scene.background = new THREE.Color(0x87ceeb);
+
+const camera = new THREE.PerspectiveCamera(
+
+75, window.innerWidth/window.innerHeight, 0.1, 1000
+
+);
+
+const renderer = new THREE.WebGLRenderer({
+
+antialias:true
+
+});
+
+renderer.setSize(window.innerWidth,window.innerHeight);
+
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+
+document.body.appendChild(renderer.domElement);
+
+const light = new THREE.HemisphereLight(0xffffff,0x667744,2);
+
+scene.add(light);
+
+const sun = new THREE.DirectionalLight(0xffffff,2);
+
+sun.position.set(10,20,10);
+
+scene.add(sun);
+
+const geometry = new THREE.BoxGeometry(1,1,1);
+
+const materials = {
+
+grass:new THREE.MeshLambertMaterial({color:0x55aa33}),
+
+dirt:new THREE.MeshLambertMaterial({color:0x79502d}),
+
+stone:new THREE.MeshLambertMaterial({color:0x888888})
+
+};
+
+const blocks = new Map();
+
+function addBlock(x,y,z,type){
+
+const key=`${x},${y},${z}`;
+
+if(blocks.has(key))return;
+
+const block=new THREE.Mesh(
+
+geometry,materials[type]||materials.grass
+
+);
+
+block.position.set(x,y,z);
+
+block.userData={x,y,z,type};
+
+scene.add(block);
+
+blocks.set(key,block);
+
+}
+
+function generateWorld(){
+
+for(let x=-12;x<=12;x++){
+
+for(let z=-12;z<=12;z++){
+
+const h=Math.floor(
+
+2+Math.sin(x*.3)+Math.cos(z*.3)
+
+);
+
+for(let y=-2;y<=h;y++){
+
+const type=y===h?'grass':y>=h-1?'dirt':'stone';
+
+addBlock(x,y,z,type);
+
+}
+
+}
+
+}
+
+}
+
+generateWorld();
+
+const player={
+
+x:0,
+
+y:6,
+
+z:8,
+
+yaw:0,
+
+pitch:0
+
+};
+
+camera.position.set(player.x,player.y,player.z);
+
+function animate(){
+
+requestAnimationFrame(animate);
+
+camera.position.set(player.x,player.y,player.z);
+
+camera.rotation.order='YXZ';
+
+camera.rotation.y=player.yaw;
+
+camera.rotation.x=player.pitch;
+
+renderer.render(scene,camera);
+
+}
+
+animate();
+
+window.addEventListener('resize',()=>{
+
+camera.aspect=window.innerWidth/window.innerHeight;
+
+camera.updateProjectionMatrix();
+
+renderer.setSize(window.innerWidth,window.innerHeight);
+
+});
+
+</script>
+
+</body>
+
+</html>
