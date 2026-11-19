@@ -124,15 +124,15 @@ scene.add(sun);
 
 const geometry = new THREE.BoxGeometry(1,1,1);
 
+
 const materials = {
-
-grass:new THREE.MeshLambertMaterial({color:0x55aa33}),
-
-dirt:new THREE.MeshLambertMaterial({color:0x79502d}),
-
-stone:new THREE.MeshLambertMaterial({color:0x888888})
-
+  grass:new THREE.MeshLambertMaterial({color:0x55aa33}),
+  dirt:new THREE.MeshLambertMaterial({color:0x79502d}),
+  stone:new THREE.MeshLambertMaterial({color:0x888888}),
+  wood:new THREE.MeshLambertMaterial({color:0x75421c}),
+  leaves:new THREE.MeshLambertMaterial({color:0x228833})
 };
+
 
 const blocks = new Map();
 
@@ -158,47 +158,68 @@ blocks.set(key,block);
 
 }
 
+
 function generateWorld(){
 
-for(let x=-12;x<=12;x++){
+  // Terrain avec collines
+  for(let x=-12;x<=12;x++){
+    for(let z=-12;z<=12;z++){
 
-for(let z=-12;z<=12;z++){
+      const h=Math.floor(
+        2+
+        Math.sin(x*.3)*1.5+
+        Math.cos(z*.3)*1.5+
+        Math.sin((x+z)*.2)
+      );
 
-const h=Math.floor(
+      for(let y=-3;y<=h;y++){
 
-2+Math.sin(x*.3)+Math.cos(z*.3)
+        let type="stone";
 
-);
+        if(y===h){
+          type="grass";
+        }
+        else if(y>=h-2){
+          type="dirt";
+        }
 
-for(let y=-2;y<=h;y++){
+        addBlock(x,y,z,type);
+      }
+    }
+  }
 
-const type=y===h?'grass':y>=h-1?'dirt':'stone';
+  // Génération des arbres
+  for(let x=-10;x<=10;x+=5){
+    for(let z=-10;z<=10;z+=5){
 
-addBlock(x,y,z,type);
+      const h=Math.floor(
+        2+
+        Math.sin(x*.3)*1.5+
+        Math.cos(z*.3)*1.5+
+        Math.sin((x+z)*.2)
+      );
 
+      // Tronc
+      for(let y=1;y<=3;y++){
+        addBlock(x,h+y,z,"wood");
+      }
+
+      // Feuilles
+      for(let dx=-2;dx<=2;dx++){
+        for(let dz=-2;dz<=2;dz++){
+          for(let dy=2;dy<=4;dy++){
+
+            if(Math.abs(dx)+Math.abs(dz)<4){
+              addBlock(x+dx,h+dy,z+dz,"leaves");
+            }
+
+          }
+        }
+      }
+    }
+  }
 }
 
-}
-
-}
-
-}
-
-generateWorld();
-
-const player={
-
-x:0,
-
-y:6,
-
-z:8,
-
-yaw:0,
-
-pitch:0
-
-};
 
 camera.position.set(player.x,player.y,player.z);
 
