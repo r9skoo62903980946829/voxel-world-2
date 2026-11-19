@@ -317,7 +317,25 @@ function groundHeight(x,z){
  if(h===undefined)h=heightAt(ix,iz);
  return h+1.65;
 }
+function canMoveTo(x,z){
+ const radius=0.35;
+ const feet=player.y-1.65;
+ const head=player.y+0.1;
 
+ for(const block of blocks.values()){
+  const p=block.position;
+
+  if(Math.abs(x-p.x)<0.5+radius &&
+     Math.abs(z-p.z)<0.5+radius){
+
+   if(head>p.y-0.5 &&
+      feet<p.y+0.5){
+    return false;
+   }
+  }
+ }
+ return true;
+}
 function animate(){
  requestAnimationFrame(animate);
  const dt=Math.min(clock.getDelta(),.04);
@@ -332,9 +350,16 @@ function animate(){
  const dz=(-Math.cos(player.yaw)*forward-
  Math.sin(player.yaw)*side)*speed*dt;
 
- player.x=THREE.MathUtils.clamp(player.x+dx,-15,15);
- player.z=THREE.MathUtils.clamp(player.z+dz,-15,15);
+ const nextX=THREE.MathUtils.clamp(player.x+dx,-15,15);
+const nextZ=THREE.MathUtils.clamp(player.z+dz,-15,15);
 
+if(canMoveTo(nextX,player.z)){
+ player.x=nextX;
+}
+
+if(canMoveTo(player.x,nextZ)){
+ player.z=nextZ;
+}
  player.vy-=18*dt;
  player.y+=player.vy*dt;
 
